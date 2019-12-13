@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 from deploy.intention_classify import intention
 from deploy.sementic_similarity import corpus
+from deploy.clawer import claw_answer
 
 status_code = {
     'success': 0,
@@ -68,8 +69,10 @@ def get_reply():
     #     return jsonify({"result":status_code['invalid_token']})
 
     # classify intention
-    result = corpus.get_similarity(data['text'])
-    return jsonify({'say':'www'})
+    sentence,score = corpus.get_similarity(data['text'])
+    if score<0.5:
+        sentence = claw_answer(input)
+    return jsonify({'say':sentence})
     # except:
     #     return jsonify({"result":status_code['fail']})
         

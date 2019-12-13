@@ -7,7 +7,8 @@ import deploy.sentence_vector as sv
 def intention_classify(X,cluster=5):
     kmean = KMeans(n_clusters=cluster)
     kmean.fit(X)
-    joblib.dump(kmean , 'km.pkl')
+    joblib.dump(kmean , 'km2.pkl')
+    print('save classify')
 
 class Intention():
     def __init__(self,classifier_file):
@@ -28,4 +29,4 @@ class Intention():
     def get_indexes(self,label):
         return self.classifier.labels_==label
 
-intention = Intention('km.pkl')
+intention = Intention('km2.pkl')
