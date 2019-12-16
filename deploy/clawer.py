@@ -1,9 +1,22 @@
 from requests_html import HTMLSession
+from urllib.request import quote, unquote
+
 from lxml import etree
 
 def claw_answer(answer):
-    session = HTMLSession()
-    r = session.get("https://zhidao.baidu.com/search?lm=0&rn=10&pn=0&fr=search&ie=gbk&word="+answer, verify=False)
-    html=etree.HTML(r.html.html)
+    url = quote("https://zhidao.baidu.com/search?lm=0&rn=10&pn=0&fr=search&ie=gbk&word="+answer, safe=";/?:@&=+$,", encoding="gbk") # 编码
+    html = get_xpath(url)
+    href = html.xpath('.//div[@id="wgt-list"]/dl[1]/dt[1]/a/@href')
+    html = get_xpath(href[0])
+    contents = html.xpath('.//div[contains(@id,"best-content")]/p/text()')
+    result = ''
+    for content in contents:
+        result += content+'\n'
+    return result
 
-claw_answer('hello world')
+def get_xpath(src):
+    session = HTMLSession()
+    r = session.get(src, verify=False)
+    return etree.HTML(r.html.html)
+
+# print(claw_answer('1111'))

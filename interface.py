@@ -71,7 +71,7 @@ def get_reply():
     # classify intention
     sentence,score = corpus.get_similarity(data['text'])
     if score<0.5:
-        sentence = claw_answer(input)
+        sentence = claw_answer(data['text'])
     return jsonify({'say':sentence})
     # except:
     #     return jsonify({"result":status_code['fail']})
