@@ -5,6 +5,7 @@ from lxml import etree
 
 def claw_answer(answer):
     url = quote("https://zhidao.baidu.com/search?lm=0&rn=10&pn=0&fr=search&ie=gbk&word="+answer, safe=";/?:@&=+$,", encoding="gbk") # 编码
+    print(url)
     html = get_xpath(url)
     href = html.xpath('.//div[@id="wgt-list"]/dl[1]/dt[1]/a/@href')
     html = get_xpath(href[0])

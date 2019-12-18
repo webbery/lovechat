@@ -37,45 +37,54 @@ class Corpus():
 
         qa_corpus = pd.read_csv(corpus_file)
         tem_corpus = []
+        questions = []
         answers = []
         for idx in range(len(qa_corpus)):
             q = qa_corpus['question'][idx]
             if isinstance(q,str):
                 question = cs.segment(q,'arr')
+                questions.append(question)
                 tem_corpus.append(question)
+            else:
+                tem_corpus.append('')
             a = qa_corpus['answer'][idx]
             if isinstance(a,str):
                 answer = cs.segment(a,'arr')
                 tem_corpus.append(answer)
                 answers.append(answer)
-        # 回答语料
-        answer_corpus = []
-        self.vectorize_ans = []
-        for sentence in answers:
-            if len(sentence)>0:
-                vec = sum([WordPool.get_vector(word) for word in sentence])/len(sentence)
-                self.vectorize_ans.append(vec)
-                answer_corpus.append(sentence)
-        self.answer_corpus = pd.Series(answer_corpus)
+            else:
+                tem_corpus.append('')
+        corpus = pd.DataFrame({'question':questions,'answer':answers})
+        drop_index=[]
+        for indx,row in corpus.iterrows():
+            if len(row['question'])==0 or len(row['answer'])==0:
+                drop_index.append(indx)
+        self.corpus = corpus.drop(index=drop_index)
+
+        # 向量化语料
+        q_vec=[]
+        a_vec=[]
+        for q in self.corpus['question']:
+            qv = np.sum([WordPool.get_vector(word) for word in q],axis=0)/len(q)
+            # print(qv.tolist(),qv.tolist()[0])
+            q_vec.append(qv.tolist())
+        # print(q_vec)
+        for a in self.corpus['answer']:
+            av = np.sum([WordPool.get_vector(word) for word in a],axis=0)/len(a)
+            a_vec.append(av.tolist())
+        self.vectorize_corpus = pd.DataFrame({'question':q_vec,'answer':a_vec})
+
         # bs = BoolSearch(answer_corpus)
         # bs.save('search_answer.jsn')
         # print('saved')
         # intention_classify(self.vectorize_ans)
 
-        # 所有语料
-        valid_corpus=[]
-        self.vectorize_corpus = []
-        for idx in range(len(tem_corpus)):
-            sentence = tem_corpus[idx]
-            if len(sentence)>0:
-                vec = sum([WordPool.get_vector(word) for word in sentence])/len(sentence)
-                self.vectorize_corpus.append(vec)
-                valid_corpus.append(sentence)
-        self.valid_corpus = pd.Series(valid_corpus)
-        # 分类回答语料
+        # 分类问题语料
         self.classified_data = []
         for label in range(intention.get_classes()):
-            data = SementicSpace(np.array(self.vectorize_ans)[intention.get_indexes(label)])
+            questions = np.array(q_vec)[intention.get_indexes(label)]
+            # print(questions)
+            data = SementicSpace(questions)
             self.classified_data.append(data)
         
 
@@ -101,19 +110,19 @@ class Corpus():
 
     def __binary_search__(self,doc):
         indexes = Search.get_indexes(doc)
-        return self.__find_similarity_by_tfidf__([doc],self.answer_corpus[indexes])
+        return self.__find_similarity_by_tfidf__([doc],self.corpus['answer'].iloc[indexes])
 
     def get_similarity(self,input,tops=10):
         intent = intention.get_intent(input)
         top10 = self.classified_data[intent].similarity(input)
-        sentences = self.answer_corpus[intention.get_indexes(intent)]
+        sentences = self.corpus['answer'].iloc[intention.get_indexes(intent)]
         top10_sentences = sentences.iloc[top10[1]]
 
         doc = cs.segment(input,'arr')
         # print(doc)
         top10_2 = self.__binary_search__(doc)
         # print(top10_2)
-        top20 = top10_sentences.tolist() + [self.answer_corpus[item[0]] for item in top10_2]
+        top20 = top10_sentences.tolist() + [self.corpus['answer'].iloc[item[0]] for item in top10_2]
         # print(top20)
         top = self.__find_similarity_by_tfidf__([doc],top20,tops=1)
         # print(top)
@@ -123,7 +132,7 @@ class Corpus():
         return sentence,top[0][1]
 
     def get_sentence(self,index):
-        return self.answer_corpus[index]
+        return self.corpus['answer'].iloc[index]
 
 # 预加载语料对象
 corpus = Corpus('qa_corpus.csv')
