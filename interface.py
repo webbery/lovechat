@@ -1,4 +1,4 @@
-
+﻿
 import json
 import urllib
 
@@ -13,9 +13,11 @@ import time
 import random
 app = Flask(__name__)
 
-from deploy.intention_classify import intention
-from deploy.sementic_similarity import corpus
-from deploy.clawer import claw_answer
+# from deploy.intention_classify import intention
+# from deploy.sementic_similarity import corpus
+# from deploy.clawer import claw_answer
+#from deploy.ner.ner import recognizer
+from deploy.dp.dp import parser
 
 status_code = {
     'success': 0,
@@ -77,5 +79,30 @@ def get_reply():
     # except:
     #     return jsonify({"result":status_code['fail']})
         
+@app.route('/v1/apis/ner',methods=['GET','POST'])
+def get_ner():
+    data = request.get_data().decode('utf-8')
+    #data = json.loads(data)
+    print(data)
+    try:
+        result = recognizer(data)
+        print(result)
+        return jsonify({"status":status_code['success'],"data":result})
+    except:
+        return jsonify({"status":status_code['fail']})
+
+@app.route('/v1/apis/dp',methods=['GET','POST'])
+def get_dp():
+    data = request.get_data().decode('utf-8')
+    #print(data)
+    try:
+        result = parser.parse(data)
+        print(result)
+        return jsonify({"status":status_code['success'],"data":result})
+    except:
+        print('----------error---------')
+        return jsonify({"status":status_code['fail']})
+
+
 app.after_request(after_request)
 app.run(host='0.0.0.0', port=config['port'], debug=False)
