@@ -13,11 +13,11 @@ import time
 import random
 app = Flask(__name__)
 
-# from deploy.intention_classify import intention
-# from deploy.sementic_similarity import corpus
-# from deploy.clawer import claw_answer
+from deploy.intention_classify import intention
+from deploy.sementic_similarity import corpus
+from deploy.clawer import claw_answer
 #from deploy.ner.ner import recognizer
-from deploy.dp.dp import parser
+#from deploy.dp.dp import parser
 
 status_code = {
     'success': 0,

@@ -1,4 +1,4 @@
-from sklearn.cluster import KMeans
+﻿from sklearn.cluster import KMeans
 from sklearn.externals import joblib
 from deploy.word_vector import model as WordPool
 import deploy.cut_sentence as cs
@@ -76,5 +76,6 @@ class Intention():
     # def get_indexes(self,label):
     #     return self.classifier.labels_==(label-1)
 
-intention = Intention('graph')
-# intention = Intention('dbscan.pkl')
+# intention = Intention('graph')
+# intention = IntentionClassify('dbscan.pkl')
+intention = IntentionClassify('km.pkl')

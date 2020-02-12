@@ -1,4 +1,4 @@
-from sklearn.neighbors import KDTree
+﻿from sklearn.neighbors import KDTree
 import deploy.cut_sentence as cs
 from deploy.word_vector import model as WordPool
 import pandas as pd
@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from pandas import Series
 from deploy.bool_search import bool_search as Search
-from deploy.bool_search import BoolSearch
+# from deploy.bool_search import BoolSearch
 
 class SementicSpace():
     def __init__(self,classes_data):
@@ -35,7 +35,7 @@ class Corpus():
     def __init__(self,corpus_file):
         super().__init__()
 
-        qa_corpus = pd.read_csv(corpus_file)
+        qa_corpus = pd.read_csv(corpus_file,sep='\t')
         tem_corpus = []
         questions = []
         answers = []
