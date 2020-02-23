@@ -1,4 +1,4 @@
-
+﻿
 import json
 import urllib
 
@@ -16,6 +16,9 @@ app = Flask(__name__)
 from deploy.intention_classify import intention
 from deploy.sementic_similarity import corpus
 from deploy.clawer import claw_answer
+#from deploy.ner.ner import recognizer
+# from deploy.dp.dp import parser
+import traceback
 
 status_code = {
     'success': 0,
@@ -70,12 +73,42 @@ def get_reply():
 
     # classify intention
     sentence,score = corpus.get_similarity(data['text'])
-    print(score)
-    if score<0.5:
+    print(score,sentence)
+    if score<0.1:
         sentence = claw_answer(data['text'])
-    return jsonify({'say':sentence})
+    val = jsonify({"status":status_code['success'],'say':sentence,'score':score})
+    # data = {"status":0, "say":'23',"score":75}
+    # json_str = json.dumps(data)
+    # print(json_str)
+    return val
     # except:
     #     return jsonify({"result":status_code['fail']})
         
+@app.route('/v1/apis/ner',methods=['GET','POST'])
+def get_ner():
+    data = request.get_data().decode('utf-8')
+    #data = json.loads(data)
+    print(data)
+    try:
+        result = recognizer(data)
+        print(result)
+        return jsonify({"status":status_code['success'],"data":result})
+    except:
+        return jsonify({"status":status_code['fail']})
+
+@app.route('/v1/apis/dp',methods=['GET','POST'])
+def get_dp():
+    data = request.get_data().decode('utf-8')
+    print(data)
+    try:
+        result = parser.parse(data)
+        print(result)
+        return jsonify({"status":status_code['success'],"data":result})
+    except:
+        print('----------error---------')
+        traceback.print_exc()
+        return jsonify({"status":status_code['fail']})
+
+
 app.after_request(after_request)
 app.run(host='0.0.0.0', port=config['port'], debug=False)

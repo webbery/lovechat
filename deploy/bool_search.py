@@ -50,7 +50,7 @@ class BoolSearch():
         result = self.__all__(self.bits)
 #         print(self.bits,result)
         for word in input:
-#             print(self.words[word])
+            if not self.words.__contains__(word): continue
             result &= self.words[word]
         return result
     
