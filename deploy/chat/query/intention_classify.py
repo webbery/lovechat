@@ -1,8 +1,8 @@
 ﻿from sklearn.cluster import KMeans
 from sklearn.externals import joblib
-from deploy.word_vector import model as WordPool
-import deploy.cut_sentence as cs
-import deploy.sentence_vector as sv
+from deploy.chat.query.word_vector import model as WordPool
+import deploy.chat.query.cut_sentence as cs
+from deploy.chat.similarity.sentence import sentence2vec
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KDTree
 from collections import defaultdict
@@ -47,13 +47,17 @@ class IntentionClassify():
     def get_intent(self,text):
         # words = cs.segment(text,'arr')
         # print(words)
-        vectorize = WordPool.get_vector(text)
+        # vectorize = WordPool.get_vector(text)
         # print(vectorize)
-        vec = sv.make_sentence_vector(vectorize)
+        # vec = sv.make_sentence_vector(vectorize)
+        # print(text)
+        vec = sentence2vec.decompose(text)
         # print(vec)
-        return self.classifier.predict([vec])[0]
+        return self.classifier.predict(vec)[0]
         # return predict_label(vec,self.classifier)[0]
 
+    def get_intent_by_vector(self,vec):
+        return self.classifier.predict(vec)[0]
 
     def get_classes(self):
         return len(set(self.classifier.labels_))

@@ -13,9 +13,8 @@ import time
 import random
 app = Flask(__name__)
 
-from deploy.intention_classify import intention
-from deploy.sementic_similarity import corpus
-from deploy.clawer import claw_answer
+# from deploy.intention_classify import intention
+from deploy.chat.chat import chat_service
 #from deploy.ner.ner import recognizer
 # from deploy.dp.dp import parser
 import traceback
@@ -72,10 +71,11 @@ def get_reply():
     #     return jsonify({"result":status_code['invalid_token']})
 
     # classify intention
-    sentence,score = corpus.get_similarity(data['text'])
+    sentence,score = chat_service.reply(data['text'])
+    # sentence,score = corpus.get_similarity(data['text'])
     print(score,sentence)
-    if score<0.1:
-        sentence = claw_answer(data['text'])
+    # if score<0.1:
+    #     sentence = claw_answer(data['text'])
     val = jsonify({"status":status_code['success'],'say':sentence,'score':score})
     # data = {"status":0, "say":'23',"score":75}
     # json_str = json.dumps(data)

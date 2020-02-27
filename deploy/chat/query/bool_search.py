@@ -9,16 +9,17 @@ class BoolSearch():
         #二进制位数
         self.bits = len(docs)
         self.keys = set()
-        for indx in range(self.bits):
+        for indx in tqdm(range(self.bits)):
             for word in docs[indx]: self.keys.add(word)
                     
-        for word in self.keys:
+        for word in tqdm(self.keys):
             for indx in range(self.bits):
                 if word not in self.words: self.words[word]=0
                 self.words[word] <<= 1
                 if word in docs[indx]:
                     self.words[word] |= 1
 #         print(self.words)
+        self.mask = self.__all__(self.bits)
 
     def __itr_dict__(self,doc):
         # 1.先遍历词典,判断词典中的词是否在新文档中
@@ -41,13 +42,14 @@ class BoolSearch():
                     
     def __all__(self,n):
         num = 1
-        for i in range(n-1):
+        for _ in range(n-1):
             num <<=1
             num |= 1
         return num
     
     def search(self,input):
-        result = self.__all__(self.bits)
+        result = self.mask
+        print(self.mask)
 #         print(self.bits,result)
         for word in input:
             if not self.words.__contains__(word): continue
@@ -59,10 +61,12 @@ class BoolSearch():
         
     def get_indexes(self,input):
         result = self.search(input)
+        print('result: ',result)
         indexes = []
         for indx in range(self.bits):
             if result & 1: indexes.append(self.bits-indx -1)
             result >>=1
+        print('indexes: ',indexes)
         return indexes
     
     def save(self,filepath):
@@ -74,6 +78,7 @@ class BoolSearch():
             s = json.load(f)
             self.bits = s['bits']
             self.words = s['words']
+            self.mask = self.__all__(self.bits)
 
 bool_search = BoolSearch()
 bool_search.load('search_answer.jsn')
