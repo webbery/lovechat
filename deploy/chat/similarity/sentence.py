@@ -67,7 +67,7 @@ class SentenceSimentic():
         vec = self.model(vec,None)
         return vec.cpu().detach().numpy().tolist()
 
-sentence2vec = SentenceSimentic('checkpoint.pkl')
+sentence2vec = SentenceSimentic('custom.pkl')
 
 def __array2sentece__(arr):
     sentences = []
@@ -104,7 +104,6 @@ def get_similarity_with_tfidf(input,source,tops=10):
     sentences.append(new_input[0])
     tfidf_vec = TfidfVectorizer()
     tfidf_matrix = tfidf_vec.fit_transform(sentences).todense()
-    
     values = cosine_similarity(tfidf_matrix)
     print(values)
     last_indx = len(source)

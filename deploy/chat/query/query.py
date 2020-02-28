@@ -7,6 +7,7 @@ from deploy.chat.similarity.simhash import SimHashSpace
 from deploy.chat.similarity.sentence import sentence2vec, get_similarity_with_tfidf
 from deploy.chat.similarity.SementicKDSpace import SementicSpace
 from deploy.chat.similarity.SIFSpace import SIFSpace
+from deploy.chat.similarity.BertSimilarity import BertSimilarity
 
 class Corpus():
     def __init__(self,corpus_file):
@@ -20,6 +21,8 @@ class Corpus():
         # 4. 构建SIF模型
         self.sif = SIFSpace(self.corpus['question'].tolist())
         print('corpus inited')
+        # 5. 载入bert模型
+        self.bert = BertSimilarity('bert.pkl')
 
     def max_similarity(self,tops):
         '''
@@ -43,19 +46,28 @@ class Corpus():
         '''
         检索匹配的句子
         '''
-        # 1. 从预分类的KD树中检索匹配的句子
-        _, indexes = self.kdtree.find_similarity_indexes(input)
-
-        reply = self.corpus['answer'][indexes].tolist()
-        # 2. 利用LHS方法检索匹配的句子
+        
+        # 1. 利用LHS方法检索匹配的句子
         indexes = self.simhash.find_similarity_indexes(input)
-
         answer = self.corpus['answer'][indexes]
-        reply += answer.tolist()
-        top = self.sif.find_similarity(input,reply,tops=3)
+        reply = answer.tolist()
+        if len(reply)>5: reply = reply[0:5]
+        #2. 使用sif查询相近句子
+        indexes = self.sif.find_similarity(input,tops=5)
+        reply += self.corpus['answer'][indexes].tolist()
+
+        # 2. 从预分类的KD树中检索匹配的句子
+        rest_cnt = 15-len(reply)
+        _, indexes = self.kdtree.find_similarity_indexes(input,rest_cnt)
+
+        reply += self.corpus['answer'][indexes].tolist()
+        print(reply)
+        
+        reply = self.bert.find_most_similarity(input,reply)
+        # print(reply)
         # sentence = top20[top[0][0]]
-        # print(sentence)
-        return top[2][0],top[2][1]
+        # print(reply)
+        return reply
 
     def get_sentence(self,index):
         return self.corpus['answer'].iloc[index]
