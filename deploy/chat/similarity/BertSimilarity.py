@@ -7,6 +7,7 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BertTokenizer, BertModel, AdamW, BertPreTrainedModel,get_linear_schedule_with_warmup,get_cosine_with_hard_restarts_schedule_with_warmup
 import re
+import logging
 
 class BertSimilarityModel(BertPreTrainedModel):
     def __init__(self, config):
@@ -66,5 +67,10 @@ class BertSimilarity():
             mask = (text != 0).float()
             _, pred = self.model(text, attention_mask=mask)
             index = np.argmax(pred,axis=1)
+            
+            logging.debug(index)
+            logging.debug(pred)
+            logging.debug(candidates)
+
             return candidates[index],float(pred[0][index])
 

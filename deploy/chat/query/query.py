@@ -1,3 +1,4 @@
+import logging
 from deploy.chat.query.word_vector import model as WordPool
 import pandas as pd
 import numpy as np
@@ -14,10 +15,11 @@ class Corpus():
         super().__init__()
         # 1. 加载语料、预生成的语义向量及它们的hash
         self.corpus = pd.read_pickle(corpus_file)
+        print(list(self.corpus.columns.values))
         # 2. 构建simhash
         self.simhash = SimHashSpace(self.corpus['question_hash'])
         # 3. 构建语义向量KD树
-        self.kdtree = SementicSpace(self.corpus['question_vector'])
+        self.kdtree = SementicSpace(self.corpus['question_vector'],self.corpus['sentence_class'])
         # 4. 构建SIF模型
         self.sif = SIFSpace(self.corpus['question'].tolist())
         print('corpus inited')
@@ -50,27 +52,32 @@ class Corpus():
         # 1. 利用LHS方法检索匹配的句子
         indexes = self.simhash.find_similarity_indexes(input)
         answer = self.corpus['answer'][indexes]
+        logging.debug(answer)
+
         reply = answer.tolist()
         if len(reply)>5: reply = reply[0:5]
         #2. 使用sif查询相近句子
         indexes = self.sif.find_similarity(input,tops=5)
-        reply += self.corpus['answer'][indexes].tolist()
+        answer = self.corpus['answer'][indexes].tolist()
+        logging.debug(answer)
+        reply += answer
 
         # 2. 从预分类的KD树中检索匹配的句子
         rest_cnt = 15-len(reply)
         _, indexes = self.kdtree.find_similarity_indexes(input,rest_cnt)
 
-        reply += self.corpus['answer'][indexes].tolist()
-        print(reply)
+        answer = self.corpus['answer'][indexes].tolist()
+        logging.debug(answer)
+
+        reply += answer
+        # logging.debug(reply)
         
         reply = self.bert.find_most_similarity(input,reply)
-        # print(reply)
-        # sentence = top20[top[0][0]]
-        # print(reply)
+        logging.debug(reply)
         return reply
 
     def get_sentence(self,index):
         return self.corpus['answer'].iloc[index]
 
 # 预加载语料对象
-corpus = Corpus('qa_corpus.pkl')
+corpus = Corpus('corpus.pkl')
