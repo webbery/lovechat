@@ -13,10 +13,9 @@ import time
 import random
 app = Flask(__name__)
 
-# from deploy.intention_classify import intention
 from deploy.chat.chat import chat_service
 #from deploy.ner.ner import recognizer
-# from deploy.dp.dp import parser
+from deploy.dp.dp import parser
 import traceback
 
 status_code = {

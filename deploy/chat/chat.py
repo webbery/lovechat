@@ -1,4 +1,5 @@
-from deploy.chat.query.query import corpus
+# from deploy.chat.query.query import corpus
+from deploy.chat.generator.inference import seq2seq
 from deploy.chat.clawer import claw_answer
 
 import logging
@@ -10,9 +11,9 @@ class ChatService():
         logger.setLevel(logging.DEBUG)
 
     def reply(self,input):
-        sentence,score = corpus.find_sentence_by_similarity(input)
+        # sentence,score = corpus.find_sentence_by_similarity(input)
         # if score<0.1:
         #     sentence = claw_answer(input)
-        return sentence, score
+        return seq2seq.generate(input), 0.5
 
 chat_service = ChatService()

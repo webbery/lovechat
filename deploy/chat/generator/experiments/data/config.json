@@ -1,0 +1,7 @@
+{
+    "train": "data_in/tr_chatbot.txt",
+    "validation": "data_in/val_chatbot.txt",
+    "test": "data_in/test_chatbot.txt",
+    "vocab": "",
+    "token2idx_vocab": "deploy/chat/generator/experiments/data/token2idx_vocab.json"
+}
